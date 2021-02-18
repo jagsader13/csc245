@@ -1,0 +1,358 @@
+Script started on Thu 02 May 2019 12:05:18 AM EDT
+]0;sims_gl@cobra:~/CSC245/Prog/Prog4[?1034h[sims_gl@cobra Prog4]$ cat -n dijkstra.cpp
+     1	#include "queue.h"
+     2	#include <string>
+     3	#include <iostream>
+     4	#include <fstream>
+     5	#include <sstream>
+     6	#include "graph.h"
+     7	#include <cstdlib>
+     8	#include <sstream>
+     9	#include <vector>
+    10	#include <climits>
+    11	#include <iomanip>
+    12	#include <stack>
+    13	#include <set>
+    14	
+    15	using namespace std;
+    16	
+    17	#include "HashTable.h"
+    18	
+    19	
+    20	struct VertexType
+    21	{
+    22		string name;
+    23		bool marked;
+    24		int distance;
+    25		string previous;	
+    26	};
+    27	
+    28	void insertionSort(string cities[], int numVertices);
+    29	void checkInFile(int argc);
+    30	void buildDGraph(Graph<string> &dGraph, string filename, string cities[], int &numVertices, int &numEdges, VertexType myVertices[]);
+    31	void printCities(string cities[], int numVertices);
+    32	string setStart(string start, int numVertices, VertexType myVertices[]);
+    33	void printRow(int location, VertexType myVertices[]);
+    34	int findMin(VertexType myVertices[], int numVertices);
+    35	void dijkstra(Graph<string> &dGraph, int numVertices, VertexType myVertices[]);
+    36	bool allMarked(int numVertices, VertexType myVertices[]);
+    37	int getCity(string start, VertexType myVertices[], int numVertices);
+    38	void assignWeights(Graph<string> &dGraph, int numVertices, VertexType myVertices[], int startingLocation, Queue<string>& getTo);
+    39	int main(int argc, char* argv[])
+    40	{
+    41		checkInFile(argc);	// Checks to see if Filename is given
+    42	
+    43		// Creation of Input File:
+    44		string filename = argv[1];
+    45	
+    46		Graph<string> dGraph; 
+    47		int numVertices;
+    48		int numEdges;
+    49		VertexType myVertices [50];
+    50		string cities [50];
+    51		buildDGraph(dGraph, filename, cities, numVertices, numEdges, myVertices);	// Builds the Graph using the data from the external file.
+    52		printCities(cities, numVertices);	// Prints Cities found in file
+    53		dijkstra(dGraph, numVertices, myVertices);	// Computes Dijkstra's Algorithm:
+    54	}
+    55	
+    56	// Checks to see if Filename is given:
+    57	void checkInFile(int argc)
+    58	{
+    59		if(argc == 1){
+    60			cout << "File not entered. Program will now close." << endl;
+    61			exit(1);
+    62		}
+    63	}
+    64	
+    65	// Computes Dijkstra's Algorithm:
+    66	void dijkstra(Graph<string> &dGraph, int numVertices, VertexType myVertices[])
+    67	{
+    68		/*string start*/; Queue<string> getTo; int index = 0;/* int startingLocation, index = 0*/;
+    69		string start;
+    70		start = setStart(start, numVertices, myVertices);
+    71	
+    72		VertexType vertStart = myVertices[getCity(start, myVertices, numVertices)];
+    73	
+    74		vertStart.distance = 0;
+    75		vertStart.previous = "N/A";
+    76		vertStart.marked = true;
+    77		int startingLocation = getCity(start, myVertices, numVertices);
+    78		//myVertices[numVertices].distance = 0;
+    79		assignWeights(dGraph, numVertices, myVertices, startingLocation, getTo);
+    80		//getCity(cities, start, numVertices);
+    81	
+    82		VertexType current = vertStart;	
+    83		while(!(allMarked(numVertices, myVertices))){
+    84			current.marked = true;
+    85			dGraph.GetToVertices(myVertices[numVertices].name, getTo);
+    86			while(!(getTo.isEmpty())){
+    87				string name = getTo.getFront();
+    88				index = getCity(name, myVertices, numVertices);
+    89				
+    90				VertexType newVertex = myVertices[index];
+    91				if(newVertex.marked == false){
+    92					int totalDistance = current.distance + dGraph.WeightIs(current.name, newVertex.name);
+    93					//cout <<"This is the total distance " << totalDistance << endl;
+    94					if(totalDistance < newVertex.distance){
+    95						newVertex.distance = totalDistance;
+    96						newVertex.previous = current.name;
+    97						//myVertices[numVertices].previous = current.name;
+    98						myVertices[getCity(newVertex.name, myVertices, numVertices)];
+    99					}
+   100				}
+   101				getTo.dequeue();
+   102				myVertices[getCity(current.name, myVertices, numVertices)];
+   103			}
+   104		}
+   105				//myVertices[getCity(current.name, myVertices, numVertices)];
+   106				//numVertices++;	
+   107			/*index = findMin(myVertices, numVertices);
+   108			cout <<"This is the index outside of the while loop " << index << endl;
+   109			if(index != -1){
+   110				start = myVertices[index].name;
+   111				cout <<"This is the start inside of if index not negative one" << start << endl;
+   112			}
+   113			else
+   114				break;
+   115			myVertices[index].marked = true;
+   116		}
+   117		int cityOrder = 0;
+   118		bool isMarked[numVertices];
+   119	
+   120		for(int i = 0; i < numVertices; i++)
+   121			isMarked[i] = false;
+   122		cout << endl;
+   123	
+   124		while(cityOrder < numVertices){
+   125			int dist = INT_MAX;
+   126			int min = 0;
+   127			for(int i = 0; i < numVertices; i++){
+   128				if((myVertices[i].distance < dist) && (isMarked[i] == false)){
+   129					min = i;
+   130					cout <<"The minimum value: " << min << endl;
+   131					dist = myVertices[i].distance;
+   132					cout <<"The distance value: " << dist << endl;
+   133				}
+   134			}
+   135			printRow(min, myVertices);
+   136			isMarked[min] = true;
+   137			cityOrder++;
+   138		}
+   139	*/
+   140		VertexType min;
+   141		min.distance = INT_MAX;
+   142		for(int i = 0; i < numVertices; i++){
+   143			VertexType dist = myVertices[i];
+   144			if(dist.distance <= min.distance && !dist.marked){
+   145				min = dist;
+   146			}
+   147		}
+   148		current = min;
+   149	
+   150		printRow(numVertices, myVertices);			
+   151	
+   152	}	
+   153	// Assign weights based on the starting location
+   154	void assignWeights(Graph<string> &dGraph, int numVertices, VertexType myVertices[], int startingLocation, Queue<string>& getTo)
+   155	{
+   156		string start; int currVer, prevVert, totalWeight;
+   157		//getCity(myVertices, start, numVertices);
+   158		//setStart(start, numVertices, myVertices);
+   159		dGraph.GetToVertices(myVertices[startingLocation].name, getTo);
+   160		
+   161		while(!getTo.isEmpty()){
+   162			string cityName = getTo.dequeue();
+   163			currVer = getCity(start, myVertices, numVertices);
+   164			totalWeight = dGraph.WeightIs(myVertices[startingLocation].name, myVertices[currVer].name);
+   165			
+   166			if(myVertices[currVer].distance != 0){
+   167				int tempC = myVertices[currVer].distance;
+   168				cout << tempC << endl;
+   169				myVertices[currVer].distance = tempC + totalWeight;
+   170			}
+   171			else
+   172				myVertices[currVer].distance = totalWeight;
+   173					
+   174		}	 	
+   175	}
+   176	
+   177	// Checks to see if all Vertices have been marked:
+   178	bool allMarked(int numVertices, VertexType myVertices[])
+   179	{
+   180		for(int i = 0; i < numVertices; i++){
+   181			if(myVertices[i].marked == true)
+   182				return true;
+   183			else
+   184				return false;
+   185		}
+   186				
+   187	}
+   188	
+   189	//Determines the index value of a given string is within array of strings
+   190	int getCity(string start, VertexType myVertices[], int numVertices)
+   191	{
+   192		/*int i = 0, index = 0;
+   193		while(myVertices[i].name.compare(start) != 0){
+   194			i++;
+   195		} 
+   196		index = i;
+   197		return i;	*/
+   198		
+   199		int i = 0;
+   200		for(i; i < numVertices; i++)
+   201			if(myVertices[i].name == start)
+   202				break;
+   203			return i;
+   204	
+   205	}
+   206	// Builds the Graph using the data from the External File:
+   207	void buildDGraph(Graph<string> &dGraph, string filename, string cities[], int &numVertices, int &numEdges, VertexType myVertices[])
+   208	{
+   209		const string NotFound = "ZZZ";
+   210		ifstream infile;
+   211		infile.open(filename.c_str());
+   212		string city1, city2, line, newcity1, newcity2; numVertices = 0; int weight;
+   213		VertexType vert1, vert2;
+   214		HashTable<string> Cities(NotFound, 50); //helps prevent duplicates for the cities
+   215		
+   216		if(infile.is_open()){
+   217			while(infile.peek() != EOF){
+   218				getline(infile, city1, ';');
+   219				if((Cities.find(city1) != city1)){
+   220					dGraph.AddVertex(city1); 
+   221					Cities.insert(city1);
+   222					cities[numVertices] = city1;
+   223					newcity1 = cities[numVertices];
+   224					vert1.name = newcity1;
+   225					vert1.distance = INT_MAX; 
+   226					vert1.marked = false;
+   227					myVertices[numVertices] = vert1;
+   228					numVertices++;
+   229				}
+   230				getline(infile, city2, ';');
+   231				if((Cities.find(city2) != city2)){
+   232					dGraph.AddVertex(city2); 
+   233					Cities.insert(city2);
+   234					cities[numVertices] = city2;
+   235					newcity2 = cities[numVertices];
+   236					vert2.name = newcity2;
+   237					vert2.distance = INT_MAX;
+   238					vert2.marked = false;
+   239					myVertices[numVertices] = vert2;
+   240					numVertices++;
+   241				}
+   242				getline(infile, line);
+   243				weight = atoi(line.c_str());
+   244				dGraph.AddEdge(city1, city2, weight);
+   245				numEdges++;
+   246				
+   247			}
+   248		}				
+   249	}
+   250	
+   251	// Prints Cities found in External File:
+   252	void printCities(string cities[], int numVertices)
+   253	{
+   254		cout <<"^^^^^^^^^^^^^^^^	DIJKSTRA'S ALGORITHM	^^^^^^^^^^^^^^^^ " << endl;
+   255		cout <<" \n A Weighted Graph Has Been Built For These " << numVertices <<" Cities: " << endl;	
+   256		insertionSort(cities, numVertices);
+   257		for(int i = 0; i <= numVertices; i++){
+   258				cout << setw(18) <<  cities[i];
+   259			}
+   260			cout << '\n';
+   261			
+   262	}
+   263	
+   264	// Sorts the Cities Alphabetically:
+   265	void insertionSort(string cities[], int numVertices)
+   266	{
+   267		string temp = cities[0];
+   268		
+   269		for(int i = 1; i < numVertices; i++)
+   270		{
+   271			temp = cities[i];
+   272			int j = 0;
+   273			for(j = i; j > 0; j--)
+   274				if(temp < cities[j-1])
+   275					cities[j] = cities[j-1];
+   276				else break;
+   277			cities[j] = temp;
+   278		}
+   279			
+   280	}
+   281	
+   282	//Sets the Starting Value in Dijsktra's Algorithm:
+   283	string setStart(string start, int numVertices, VertexType myVertices[])
+   284	{
+   285		cout << " Please input your starting vertex: ";
+   286		string response;
+   287		getline(cin,response);
+   288		bool isThere = false;
+   289		for (int i = 0;	i < numVertices; i++)
+   290		{
+   291			if (myVertices[i].name.compare(response) == 0)
+   292			{
+   293				start = response;
+   294				return start;
+   295			}
+   296		}
+   297		while (!isThere)
+   298		{
+   299			cout << " Starting location does not exist..." << endl;
+   300			cout << " Please input your new vertex: ";
+   301	        	string response;
+   302	        	cin >> response;
+   303			for (int i = 0; i < numVertices; i++)
+   304	        	{
+   305	                	if (myVertices[i].name.compare(response) == 0)
+   306				{
+   307	                        	start = response;
+   308	                        	return start;
+   309	                	}
+   310	        	}
+   311		}
+   312	}
+   313	
+   314	// Finds the minimum non-marked values in VertexType Array:
+   315	int findMin(VertexType myVertices[], int numVertices)
+   316	{
+   317	 		int minWeight = INT_MAX - 1;
+   318	                int minThing = -1;
+   319			for (int i = 0; i < numVertices; i++)
+   320	                {
+   321	                        if (myVertices[i].distance < minWeight && !myVertices[i].marked)
+   322	                        {
+   323	                                minWeight = myVertices[i].distance;
+   324	                                minThing = i;
+   325	                        }
+   326				else if (myVertices[i].distance == minWeight && !myVertices[i].marked)
+   327	        		{
+   328	                                minWeight = myVertices[i].distance;
+   329	                                minThing = i;
+   330	                        }
+   331	
+   332			}        
+   333			return minThing;
+   334	}
+   335	
+   336	// Prints a given row in a Summary Table:
+   337	void printRow(int location, VertexType myVertices[])
+   338	{
+   339		if (myVertices[location].distance != -1)
+   340		cout << setw(14) << myVertices[location].name << setw(18) << myVertices[location].distance << setw(16) << myVertices[location].previous << endl;
+   341		else
+   342		 cout << setw(14) << myVertices[location].name << setw(18) << "Not On Path" << setw(16) << myVertices[location].previous << endl;
+   343	}
+   344	
+]0;sims_gl@cobra:~/CSC245/Prog/Prog4[sims_gl@cobra Prog4]$ a.[K[Kc++ dijkstra.cpp
+]0;sims_gl@cobra:~/CSC245/Prog/Prog4[sims_gl@cobra Prog4]$ a.out ginfile1.dat
+^^^^^^^^^^^^^^^^	DIJKSTRA'S ALGORITHM	^^^^^^^^^^^^^^^^ 
+ 
+ A Weighted Graph Has Been Built For These 7 Cities: 
+           Atlanta            Austin           Chicago            Dallas            Denver           Houston        Washington                  
+ Please input your starting vertex: Wsh  ashington
+^C
+]0;sims_gl@cobra:~/CSC245/Prog/Prog4[sims_gl@cobra Prog4]$ exit
+exit
+
+Script done on Thu 02 May 2019 12:05:40 AM EDT

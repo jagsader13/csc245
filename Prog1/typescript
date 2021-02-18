@@ -1,0 +1,576 @@
+Script started on Fri 18 Sep 2020 11:05:25 PM EDT
+]0;barry_jr@cobra:~/csc245/Prog1[?1034h[barry_jr@cobra Prog1]$ a.outc++ MoveFront.cpp[4Pat dlist.cpp[2PhMoveFront.cpp[11Pscriptcat MoveFront.cpp
+#include <cstddef> 
+#include <iostream>
+
+using namespace std;
+#include "dlist.h"
+
+void PrintMenu(char &selection)//Function to print the menu and take in the user selection
+{
+    cout << "Menu" << endl;
+    cout << "H: Insert item at front" << endl;
+    cout << "T: Insert item at back" << endl;
+    cout << "A: Access an item in list" << endl;
+    cout << "D: Delete an item in list" << endl;
+    cout << "P: Print the list" << endl;
+    cout << "L: Print the list's length" << endl;
+    cout << "Q: Quit the program" << endl;
+    cout << "----------------------------------" << endl;
+    cout << "Please enter your choice" << endl;
+    cin >> selection;
+}   
+
+void destroy(DList<int>& list)//Function to delete any node
+{
+     if(list.isEmpty()==true)
+    {
+        cout<< "List is empty! Add a number to the list!" << endl;
+         cout << endl;
+    }
+    else
+    {
+        cout << "What existing number do you want to delete?" << endl;
+        int num;
+        cin >> num;
+        if(list.inList(num)==true)
+        {
+            list.deleteItem(num);
+             cout << endl;
+    }
+        else
+        {
+            cout << "Number is not in list! Try again!" << endl;
+             cout << endl;
+        }
+    }
+    
+    
+}
+
+void insertFront(DList<int>& list)//Function to put a new node at the beginning of the list
+{
+    int num;
+    cout << "What number do you want to add to the front of the list?" << endl;
+    cin >> num;
+    if(list.inList(num)==false)
+    {
+        list.insertHead(num);
+         cout << endl;
+    }
+    else
+    {
+       cout << "Number is already added to list! Try again!" << endl;
+        cout << endl;
+    }
+    
+}
+
+void printOut(const DList<int>& list)//Function to print out the whole list
+{
+    if(list.isEmpty()==true)
+    {
+        cout<< "List is empty! Add a number to the list!" << endl;
+         cout << endl;
+    }
+    else
+    {
+        list.print();
+         cout << endl;
+    }
+}
+
+void numItems(const DList<int>& list)//Function to print out the length of the list
+{
+    if(list.isEmpty()==true)
+    {
+        cout<< "List is empty! Add a number to the list!" << endl;
+         cout << endl;
+    }
+    else
+    {
+        cout << "The list has " << list.lengthIs() << " number/numbers on it." << endl;
+         cout << endl;
+    }
+    
+    
+}
+
+void insertBack(DList<int>& list)//Function to put a new node at the back of the list
+{
+    int num;
+    cout << "What number do you want to add to the back of the list?" << endl;
+    cin >> num;
+    if(list.inList(num)==false)
+   {
+        if(list.isEmpty()==true)
+        {
+            list.insertHead(num);
+             cout << endl;
+        }
+        else
+        {
+            list.appendTail(num);
+             cout << endl;
+        } 
+    }
+    else
+    {
+         cout << "Number is already added to list! Try again!" << endl;
+    }
+}
+
+void access(DList<int>& list)//Function to move an existing item to the front of the list 
+{
+    if(list.isEmpty()==true)
+    {
+        cout<< "List is empty! Add a number to the list!" << endl;
+    }
+    else
+    {
+        int num;
+        cout << "What existing number would you like to move to the front?" << endl;
+        cin >> num;
+        if(list.inList(num)==true)
+        {
+            list.deleteItem(num);
+            list.insertHead(num);
+            cout << endl;
+        }
+        else
+        {
+             cout << "Number is not in list! Try again!" << endl;
+        }
+    }
+    
+}
+int main()
+{
+   DList<int> list;
+   char sel;
+   do
+    {
+        PrintMenu (sel);
+        switch (toupper(sel))
+        {
+            case 'H' :   insertFront(list);  break;
+            case 'T' :   insertBack(list);  break;
+            case 'A' :   access(list);  break;
+            case 'D' :   destroy(list);  break;
+            case 'P' :   printOut(list); break;
+            case 'L' :   numItems(list); break;
+            case 'Q' :   cout << "\tExiting Program...\n"; break;
+            default  :   cout << "\tError.  Try Again." << endl;
+        }
+    } while (toupper(sel) != 'Q');
+    
+}]0;barry_jr@cobra:~/csc245/Prog1[barry_jr@cobra Prog1]$ cat MoveFront.cpp[Kcat MoveFront.cppa.out[Kc++ MoveFront.cpp[4Pat dlist.cpp[2PhMoveFront.cpp[6Pdlist.h
+
+using namespace std;
+
+template <class ItemType>
+struct NodeType;
+
+template <class ItemType>
+class DList 
+{
+public :
+    DList ();		// Constructor
+    ~DList   ();  	// Destructor	
+
+    // Public Operations
+    void makeEmpty (); 
+    void deleteItem (ItemType item);
+    bool inList (ItemType item) const;	
+    bool isEmpty () const;  
+    void print() const; 
+    void insertHead (ItemType item); 
+    void appendTail (ItemType item); 
+    int lengthIs() const;
+
+private :
+    // Private Attributes of a DList Object 
+    NodeType<ItemType>* head;
+    int length;
+
+    // Functions Called Solely By Public Functions, Not The Client 
+    NodeType<ItemType>* location(ItemType item) const;
+    NodeType<ItemType>* last() const; 
+    void deleteLocation (NodeType<ItemType>* delPtr);
+};
+
+#include "dlist.cpp"
+]0;barry_jr@cobra:~/csc245/Prog1[barry_jr@cobra Prog1]$ cat dlist.hMoveFront.cppa.out[Kc++ MoveFront.cpp[4Pat dlist.cpp[2Phcpp
+#include <cstddef> 
+#include <iostream>
+
+using namespace std;
+
+template<class ItemType>
+struct NodeType
+{
+	ItemType info;
+	NodeType<ItemType>*	next;
+	NodeType<ItemType>*	back;
+};
+
+template <class ItemType>		
+DList<ItemType>::DList()		// Class constructor
+{
+    length = 0;
+    head = NULL;
+}
+
+template <class ItemType>
+DList<ItemType>::~DList   ()		
+{
+	// Post: List is empty; All items have been deallocated.
+
+}
+
+template <class ItemType>
+void DList<ItemType>::makeEmpty()
+{
+    // Post: List is empty; all items have been deallocated.
+        while(head->next!=NULL)
+        {
+                delete head;
+        }
+
+}
+
+template <class ItemType>
+void DList<ItemType>::deleteItem (ItemType item)	
+{
+	//  Pre :  item to be deleted is passed in via parameter 
+        // Post :  item is deleted if it exists in list 
+        deleteLocation(location(item));
+
+}
+
+template <class ItemType>
+bool DList<ItemType>::inList (ItemType item) const
+{
+	//  Pre :  item to be located is passed in via parameter 
+        // Post :  function returns bool value if item is found 
+        NodeType<ItemType>* temp = new NodeType<ItemType>;
+        temp=head;
+        bool found=false;
+        while(temp!=NULL)
+        {
+                int num = temp ->info;
+                if(num==item)
+                {
+                        found=true;
+                        break;
+                }
+                else
+                {
+                        temp=temp->next;
+                }
+                
+        }
+        return found;
+}  
+
+
+template <class ItemType>
+bool DList<ItemType>::isEmpty() const		
+{
+	// Post : function returns true if list is empty, false otherwise
+        if(head==NULL)
+        {
+                return true;
+        }
+        else
+        {
+                return false;
+        }
+        
+}
+
+template <class ItemType>
+void DList<ItemType>::print() const	
+{
+	// Pre  : List is not empty 
+	// Post : Items in List have been printed to screen
+        NodeType<ItemType>* temp = new NodeType<ItemType>;
+        temp=head;
+                while(temp!=NULL)
+                {
+                        cout << temp->info << endl;
+                        temp= temp->next;
+
+                }
+}
+	
+template <class ItemType>
+void DList<ItemType>::insertHead(ItemType item)	
+{
+	//  Pre : item to be inserted is passed in via parameter
+        // Post : item is inserted at head of list;  Former first node is 
+        //        linked back to this new one via double link;
+        //        Length incremented;  Special case handled if list is empty 
+	NodeType<ItemType>* newNode = new NodeType<ItemType>;
+        newNode->info = item;    
+        newNode->back = NULL;
+        if (head != NULL)
+        {
+                head -> back = newNode;      
+                newNode-> next = head;
+        }
+        else
+        {
+                newNode->next = NULL;
+        }
+        head = newNode;    
+        length++;
+}
+
+template <class ItemType>
+void DList<ItemType>::appendTail(ItemType item)
+{
+	//  Pre :  item to be inserted is passed in via parameter
+        // Post :  item is added to tail of list; Former last node
+        //         is linked to this new one via double link 
+        NodeType<ItemType>* newNode = new NodeType<ItemType>;      
+        newNode->info = item;
+        last()-> next=newNode;
+        newNode->back=last();
+        newNode->next=NULL;
+        length++;
+
+}
+
+template <class ItemType>
+int DList<ItemType>::lengthIs() const	
+{
+	// Post : Function returns current length of list  
+        return length;
+}
+
+template <class ItemType>
+NodeType<ItemType>* DList<ItemType>::location(ItemType item) const	
+{
+	//  Pre : item to be located is passed in via parameter 
+        // Post : function returns address of item being searched for --
+        //        if not found, NULL is returned  
+	 NodeType<ItemType>* temp = new NodeType<ItemType>;
+        temp=head;
+        int find=item;
+        bool found=false;
+        while(temp!=NULL)
+        {
+                if(temp->info==item)
+                {
+                        found=true;
+                        break;
+                }
+                else
+                {
+                        temp=temp->next;
+                }
+                
+        }
+        if(found==true)
+        {
+                return temp;
+        }
+        else
+        {
+                return NULL;
+        }
+}
+
+template <class ItemType>
+NodeType<ItemType>* DList<ItemType>::last() const	
+{
+	// Post : Function returns location of current last item in list
+	NodeType<ItemType>* temp = new NodeType<ItemType>;
+        temp=head;
+        while(temp->next!=NULL)
+        {
+                temp=temp->next;
+        }
+        return temp;
+}
+
+template <class ItemType>
+void DList<ItemType>::deleteLocation (NodeType<ItemType>* delPtr)	
+{
+
+	//  Pre : Item to be deleted exits in list and its location
+        //        is passed in via parameter
+                   
+	// Post : Location passed in is removed from list;  Length
+        //        is decremented, and location is deallocated 
+
+        // Special Cases Handled for Deleting Only One Item in List,
+        // The Head Item of List, and the Tail Item of List
+        if (head==delPtr)
+        {
+                head=delPtr->next;
+                delPtr->next->back=NULL;
+                delete delPtr;
+                delPtr=NULL;
+        }  
+        else if(delPtr->next==NULL)  
+        {
+                delPtr->back->next=NULL;
+                delete delPtr;
+                delPtr=NULL;
+        }
+        else   
+        {   
+                delPtr->back->next=delPtr->next;
+                delPtr->next->back=delPtr->back;
+                delete delPtr;
+                delPtr=NULL;
+        }
+        length--;
+        
+}
+]0;barry_jr@cobra:~/csc245/Prog1[barry_jr@cobra Prog1]$ cat dlist.cpp[2PhMoveFront.cppa.out[Kc++ MoveFront.cpp[4Pat dlist.cpp++ MoveFront.cpp
+]0;barry_jr@cobra:~/csc245/Prog1[barry_jr@cobra Prog1]$ c++ MoveFront.cpp[4Pat dlist.cpp[2PhMoveFront.cppa.out[K
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+h
+What number do you want to add to the front of the list?
+10
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+t
+What number do you want to add to the back of the list?
+11
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+t
+What number do you want to add to the back of the list?
+12
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+h
+What number do you want to add to the front of the list?
+9
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+p
+9
+10
+11
+12
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+l
+The list has 4 number/numbers on it.
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+d
+What existing number do you want to delete?
+9
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+a
+What existing number would you like to move to the front?
+11
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+l
+The list has 3 number/numbers on it.
+
+Menu
+H: Insert item at front
+T: Insert item at back
+A: Access an item in list
+D: Delete an item in list
+P: Print the list
+L: Print the list's length
+Q: Quit the program
+----------------------------------
+Please enter your choice
+q
+	Exiting Program...
+]0;barry_jr@cobra:~/csc245/Prog1[barry_jr@cobra Prog1]$ exit
+exit
+
+Script done on Fri 18 Sep 2020 11:07:00 PM EDT

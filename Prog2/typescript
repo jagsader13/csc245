@@ -1,0 +1,617 @@
+Script started on Wed 07 Oct 2020 11:45:44 PM EDT
+]0;barry_jr@cobra:~/csc245/Prog2[?1034h[barry_jr@cobra Prog2]$ cat testBet.cpp
+#include <iostream>
+#include <cstdlib>
+#include <stack>
+
+using namespace std;
+#include "bet.h"
+
+//Function to print the menu and take in the user sclearelection
+void PrintMenu(char &sel)
+{
+    cout << "Building Binary Expression Trees" << endl;
+    cout << "----------------------------------------------" << endl;
+    cout << "1) Prefix" << endl;
+    cout << "2) Infix" << endl;
+    cout << "3) Postfix" << endl;
+    cout << endl;
+    cout << "Your Expression Type: " ;
+    cin >> sel;
+    cout << endl;
+}   
+//Method to check precedence
+int precedence(char c) 
+{ 
+    if(c == '*' || c == '/') 
+    {
+        return 2; 
+    }
+    else if(c == '+' || c == '-') 
+    {
+         return 1; 
+    }
+    else
+    {
+        return -1; 
+    }
+} 
+//Method to check if a char is a operator
+bool isOperator(char character)
+{
+    if (character == '+' || character == '-' || character == '*' || character == '/')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }     
+}
+
+//Method to check if a char is a operand
+bool isOperand(char operand)
+{
+    if(operand=='+' || operand=='-' || operand=='*' || operand=='/' || operand==')' || operand=='(')
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+    
+}
+//Method to check if a char is a open parantheses
+bool isOpen(char character)
+{
+    if(character=='(')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
+}
+//Method to check if a char is a closed parantheses
+bool isClosed(char character)
+{
+    if(character==')')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+//Method to convert infix to postfix and prefix
+void infix(string infix,char &sel,stack<BETPtr&> tree)
+{
+    string postfix;
+    stack <char> st; 
+    for(int i=0;i<infix.length();i++)
+    {
+        if(isOperand(infix.at(i)))
+        {
+            postfix+=infix.at(i);
+        }
+        else if(isOpen(infix.at(i)))
+        {
+            st.push('(');
+        }
+        else if(isClosed(infix.at(i)))
+        {
+             while(!st.empty() && st.top() != '(') 
+            { 
+                char top= st.top(); 
+                st.pop(); 
+                postfix+=top;
+            } 
+            if(isOpen(st.top()))
+            { 
+                char top= st.top(); 
+                st.pop(); 
+            } 
+        }
+        else
+        { 
+            while(!st.empty() && precedence(infix[i]) <= precedence(st.top())) 
+            { 
+                char top= st.top(); 
+                st.pop(); 
+                postfix+=top;
+            } 
+            st.push(infix[i]); 
+        } 
+    }
+    while(!st.empty()) 
+    { 
+        char top= st.top(); 
+        st.pop(); 
+        postfix+=top;
+    } 
+    
+    postfix(postfix,sel,tree);
+}
+
+//Method to convert postfix to infix and prefix
+void postfix(string postfix, char &sel, stack<BETPtr&> tree)
+{
+    for (int i=0; i< postfix.length(); i++)
+    {
+        tree.insertPostfixOperator(postfix.at(i));
+    }
+    cout <<"Prefix Expression Produced From Tree:" << endl;
+    tree.preorder();
+    cout  << endl;
+    cout <<"Infix Expression Produced From Tree:" << endl;
+    tree.inorder();
+    cout <<endl;
+    cout <<"Postfix Expression Produced From Tree:" << endl;
+    tree.postorder();
+    cout << endl;
+    cout<<"Build Another Tree? (Y/N): " << endl;
+    cin >> sel;
+    cout <<endl;
+
+}
+ //Method to convert prefix to postfix and infix
+void prefix(string prefix,char &sel,stack<BETPtr&> tree)
+{
+     for (int i=0; i< prefix.length(); i++)
+    {
+        tree.insertPrefixOperator(prefix.at(i));
+    }
+    cout <<"Prefix Expression Produced From Tree:" << endl;
+    tree.preorder();
+    cout  << endl;
+    cout <<"Infix Expression Produced From Tree:" << endl;
+    tree.inorder();
+    cout <<endl;
+    cout <<"Postfix Expression Produced From Tree:" << endl;
+    tree.postorder();
+    cout << endl;
+    cout<<"Build Another Tree? (Y/N): " << endl;
+    cin >> sel;
+    cout <<endl;
+}
+//Main method
+int main()
+{
+   stack<BETPtr&> tree;
+   char sel;
+   string expression;
+   do
+    {
+        PrintMenu (sel);
+        cout << "Your Expression: ";
+        getline(cin,expression);
+        cout << endl;
+        switch (sel)
+        {
+            case '1' :  prefix(expression,sel,tree);  break;
+            case '2' :  infix(expression,sel,tree);  break;
+            case '3' :  postfix(expression,sel,tree); break;
+            default  :   cout << "\tError.  Try Again." << endl;
+        }
+    } while (toupper(sel) != 'N');
+    cout << "Program Now Deconstructing Tree & Exiting..." << endl;
+}]0;barry_jr@cobra:~/csc245/Prog2[barry_jr@cobra Prog2]$ cat bet.cpp
+#include <iostream>
+#include <cstdlib>
+#include <stack>
+
+using namespace std;
+#include "bet.h"
+
+void BET::makeEmpty()
+{
+    makeEmpty(root);
+}
+
+BET::BET()
+{
+  root = NULL;
+}
+
+// Call to postOrder from public
+void BET::postorder( ) const
+{
+     if( isEmpty( ) )
+     {
+           cout << "Empty tree" << endl;
+     }
+    else
+    {
+         postorder( root );
+    }         
+}
+
+ // Call to postOrder from private -- Accesses the Root Ptr 
+
+void BET::postorder(BETPtr t) const
+{
+     if( t != NULL )
+     {
+          postorder(t->left );
+          postorder( t->right );
+          cout << t->info.theContent.opsymbol<< '\t';
+     }
+}
+// Call to preOrder from public
+void BET::preorder() const
+{
+     if( isEmpty( ) )
+     {
+           cout << "Empty tree" << endl;
+     }
+    else
+    {
+         preorder( root );
+    }         
+}
+
+ // Call to preOrder from private -- Accesses the Root Ptr 
+
+void BET::preorder(BETPtr t) const
+{
+     if( t != NULL )
+     {
+          cout << t->info.theContent.opsymbol << '\t';
+          preorder(t->left );
+          preorder( t->right );
+     }
+}
+
+// Call to inorder from public
+void BET::inorder() const
+{
+     if( isEmpty( ) )
+     {
+           cout << "Empty tree" << endl;
+     }
+    else
+    {
+         inorder( root );
+    }         
+}
+
+ // Call to inOrder from private -- Accesses the Root Ptr 
+void BET::inorder(BETPtr t) const  
+{
+     if( t != NULL )
+     {
+          inorder(t->left );
+          cout << t->info.theContent.opsymbol << '\t';
+          inorder( t->right );
+     }
+}
+//Call to makeEmpty from public 
+BET::~BET()
+{
+    makeEmpty();
+    cout << "Deconstructing the List" << endl;
+}
+//Call to makeEmpty from private
+void BET::makeEmpty(BETPtr& t) const
+{
+     if( t != NULL )
+     {
+          makeEmpty( t->left );
+          makeEmpty( t->right );
+          delete t;
+     }
+            t = NULL;
+}
+//Call to isEmpty from public
+bool BET::isEmpty() const
+{
+     return root == NULL;
+}
+
+void BET::insertPrefixOperator (char token)
+{
+     BinaryNode* newElement=new BinaryNode;
+     newElement-> info.whichType=OPERATOR;
+     newElement-> info.theContent.opsymbol=token;
+     newElement-> left=s.top(); 
+     s.pop();
+     newElement-> right=s.top(); 
+     s.pop();
+     s.push(newElement);
+     root=newElement;
+}
+
+void BET::insertPostfixOperator (char token)
+{
+     BinaryNode* newElement=new BinaryNode;
+     newElement-> info.whichType=OPERATOR;
+     newElement-> info.theContent.opsymbol=token;
+     newElement-> right=s.top(); 
+     s.pop();
+     newElement-> left=s.top(); 
+     s.pop();
+     s.push(newElement);
+     root=newElement;
+}
+
+
+ ]0;barry_jr@cobra:~/csc245/Prog2[barry_jr@cobra Prog2]$ c++ testbet[K[K[K[K[K[K[K[K[K[K[Kcat bet.cpptestBet.cppvim[C[C[C[C[C[C[C[C[C[C[C[C[4Pbet.cppls[Kcd Prog2ls[Kcd csc245[K./tread[2Pclear./tread[K[K[K[K[K[K[Kc++ testbet[K[K[KBet.cpp bet.o
+In file included from [01m[K/opt/GNAT/2020/include/c++/9.3.1/x86_64-pc-linux-gnu/bits/c++allocator.h:33[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/allocator.h:46[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/string:41[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/locale_classes.h:40[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/ios_base.h:41[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ios:42[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ostream:38[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/iostream:39[m[K,
+                 from [01m[KtestBet.cpp:1[m[K:
+/opt/GNAT/2020/include/c++/9.3.1/ext/new_allocator.h: In instantiation of '[01m[Kclass __gnu_cxx::new_allocator<BinaryNode*&>[m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/allocator.h:112:11:[m[K   required from '[01m[Kclass std::allocator<BinaryNode*&>[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:483:21:[m[K   required from '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:849:11:[m[K   required from '[01m[Kclass std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:134:47:[m[K   required from '[01m[Kclass std::stack<BinaryNode*&>[m[K'
+[01m[KtestBet.cpp:89:54:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/ext/new_allocator.h:63:26:[m[K [01;31m[Kerror: [m[Kforming pointer to reference type '[01m[KBinaryNode*&[m[K'
+   63 |       typedef _Tp*       [01;31m[Kpointer[m[K;
+      |                          [01;31m[K^~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/ext/new_allocator.h:64:26:[m[K [01;31m[Kerror: [m[Kforming pointer to reference type '[01m[KBinaryNode*&[m[K'
+   64 |       typedef const _Tp* [01;31m[Kconst_pointer[m[K;
+      |                          [01;31m[K^~~~~~~~~~~~~[m[K
+In file included from [01m[K/opt/GNAT/2020/include/c++/9.3.1/string:41[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/locale_classes.h:40[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/ios_base.h:41[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ios:42[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ostream:38[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/iostream:39[m[K,
+                 from [01m[KtestBet.cpp:1[m[K:
+/opt/GNAT/2020/include/c++/9.3.1/bits/allocator.h: In instantiation of '[01m[Kclass std::allocator<BinaryNode*&>[m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:483:21:[m[K   required from '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:849:11:[m[K   required from '[01m[Kclass std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:134:47:[m[K   required from '[01m[Kclass std::stack<BinaryNode*&>[m[K'
+[01m[KtestBet.cpp:89:54:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/allocator.h:117:26:[m[K [01;31m[Kerror: [m[Kforming pointer to reference type '[01m[KBinaryNode*&[m[K'
+  117 |       typedef _Tp*       [01;31m[Kpointer[m[K;
+      |                          [01;31m[K^~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/allocator.h:118:26:[m[K [01;31m[Kerror: [m[Kforming pointer to reference type '[01m[KBinaryNode*&[m[K'
+  118 |       typedef const _Tp* [01;31m[Kconst_pointer[m[K;
+      |                          [01;31m[K^~~~~~~~~~~~~[m[K
+In file included from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ext/alloc_traits.h:36[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/basic_string.h:40[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/string:55[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/locale_classes.h:40[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/ios_base.h:41[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ios:42[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ostream:38[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/iostream:39[m[K,
+                 from [01m[KtestBet.cpp:1[m[K:
+/opt/GNAT/2020/include/c++/9.3.1/bits/alloc_traits.h: In instantiation of '[01m[Kstruct std::allocator_traits<std::allocator<BinaryNode*&> >[m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/ext/alloc_traits.h:50:10:[m[K   required from '[01m[Kstruct __gnu_cxx::__alloc_traits<std::allocator<BinaryNode*&>, BinaryNode*&>[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:483:21:[m[K   required from '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:849:11:[m[K   required from '[01m[Kclass std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:134:47:[m[K   required from '[01m[Kclass std::stack<BinaryNode*&>[m[K'
+[01m[KtestBet.cpp:89:54:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/alloc_traits.h:400:13:[m[K [01;31m[Kerror: [m[Kforming pointer to reference type '[01m[KBinaryNode*&[m[K'
+  400 |       using [01;31m[Kpointer[m[K = _Tp*;
+      |             [01;31m[K^~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/alloc_traits.h:403:13:[m[K [01;31m[Kerror: [m[Kforming pointer to reference type '[01m[KBinaryNode*&[m[K'
+  403 |       using [01;31m[Kconst_pointer[m[K = const _Tp*;
+      |             [01;31m[K^~~~~~~~~~~~~[m[K
+In file included from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/basic_string.h:40[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/string:55[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/locale_classes.h:40[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/ios_base.h:41[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ios:42[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/ostream:38[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/iostream:39[m[K,
+                 from [01m[KtestBet.cpp:1[m[K:
+/opt/GNAT/2020/include/c++/9.3.1/ext/alloc_traits.h: In instantiation of '[01m[Kstruct __gnu_cxx::__alloc_traits<std::allocator<BinaryNode*&>, BinaryNode*&>[m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:483:21:[m[K   required from '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:849:11:[m[K   required from '[01m[Kclass std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:134:47:[m[K   required from '[01m[Kclass std::stack<BinaryNode*&>[m[K'
+[01m[KtestBet.cpp:89:54:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/ext/alloc_traits.h:66:23:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[K__gnu_cxx::__alloc_traits<std::allocator<BinaryNode*&>, BinaryNode*&>::_Base_type {aka std::allocator_traits<std::allocator<BinaryNode*&> >}::allocate[m[K' in '[01m[K__gnu_cxx::__alloc_traits<std::allocator<BinaryNode*&>, BinaryNode*&>::_Base_type[m[K' {aka '[01m[Kstruct std::allocator_traits<std::allocator<BinaryNode*&> >[m[K'}
+   66 |     using _Base_type::[01;31m[Kallocate[m[K;
+      |                       [01;31m[K^~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/ext/alloc_traits.h:67:23:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[K__gnu_cxx::__alloc_traits<std::allocator<BinaryNode*&>, BinaryNode*&>::_Base_type {aka std::allocator_traits<std::allocator<BinaryNode*&> >}::deallocate[m[K' in '[01m[K__gnu_cxx::__alloc_traits<std::allocator<BinaryNode*&>, BinaryNode*&>::_Base_type[m[K' {aka '[01m[Kstruct std::allocator_traits<std::allocator<BinaryNode*&> >[m[K'}
+   67 |     using _Base_type::[01;31m[Kdeallocate[m[K;
+      |                       [01;31m[K^~~~~~~~~~[m[K
+In file included from [01m[K/opt/GNAT/2020/include/c++/9.3.1/deque:67[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/stack:60[m[K,
+                 from [01m[KtestBet.cpp:3[m[K:
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h: In instantiation of '[01m[Kclass std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:134:47:[m[K   required from '[01m[Kclass std::stack<BinaryNode*&>[m[K'
+[01m[KtestBet.cpp:89:54:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:894:20:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base {aka std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >}::_M_create_nodes[m[K' in '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base[m[K' {aka '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'}
+  894 |       using _Base::[01;31m[K_M_create_nodes[m[K;
+      |                    [01;31m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:895:20:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base {aka std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >}::_M_destroy_nodes[m[K' in '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base[m[K' {aka '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'}
+  895 |       using _Base::[01;31m[K_M_destroy_nodes[m[K;
+      |                    [01;31m[K^~~~~~~~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:896:20:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base {aka std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >}::_M_allocate_node[m[K' in '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base[m[K' {aka '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'}
+  896 |       using _Base::[01;31m[K_M_allocate_node[m[K;
+      |                    [01;31m[K^~~~~~~~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:897:20:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base {aka std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >}::_M_deallocate_node[m[K' in '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base[m[K' {aka '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'}
+  897 |       using _Base::[01;31m[K_M_deallocate_node[m[K;
+      |                    [01;31m[K^~~~~~~~~~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:898:20:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base {aka std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >}::_M_allocate_map[m[K' in '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base[m[K' {aka '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'}
+  898 |       using _Base::[01;31m[K_M_allocate_map[m[K;
+      |                    [01;31m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:899:20:[m[K [01;31m[Kerror: [m[Kno members matching '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base {aka std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >}::_M_deallocate_map[m[K' in '[01m[Kstd::deque<BinaryNode*&, std::allocator<BinaryNode*&> >::_Base[m[K' {aka '[01m[Kclass std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >[m[K'}
+  899 |       using _Base::[01;31m[K_M_deallocate_map[m[K;
+      |                    [01;31m[K^~~~~~~~~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:1547:7:[m[K [01;31m[Kerror: [m[K'[01m[Kvoid std::deque<_Tp, _Alloc>::push_front(std::deque<_Tp, _Alloc>::value_type&&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::deque<_Tp, _Alloc>::value_type = BinaryNode*&][m[K' cannot be overloaded with '[01m[Kvoid std::deque<_Tp, _Alloc>::push_front(const value_type&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::deque<_Tp, _Alloc>::value_type = BinaryNode*&][m[K'
+ 1547 |       [01;31m[Kpush_front[m[K(value_type&& __x)
+      |       [01;31m[K^~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:1532:7:[m[K [01;36m[Knote: [m[Kprevious declaration '[01m[Kvoid std::deque<_Tp, _Alloc>::push_front(const value_type&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::deque<_Tp, _Alloc>::value_type = BinaryNode*&][m[K'
+ 1532 |       [01;36m[Kpush_front[m[K(const value_type& __x)
+      |       [01;36m[K^~~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:1584:7:[m[K [01;31m[Kerror: [m[K'[01m[Kvoid std::deque<_Tp, _Alloc>::push_back(std::deque<_Tp, _Alloc>::value_type&&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::deque<_Tp, _Alloc>::value_type = BinaryNode*&][m[K' cannot be overloaded with '[01m[Kvoid std::deque<_Tp, _Alloc>::push_back(const value_type&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::deque<_Tp, _Alloc>::value_type = BinaryNode*&][m[K'
+ 1584 |       [01;31m[Kpush_back[m[K(value_type&& __x)
+      |       [01;31m[K^~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:1569:7:[m[K [01;36m[Knote: [m[Kprevious declaration '[01m[Kvoid std::deque<_Tp, _Alloc>::push_back(const value_type&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::deque<_Tp, _Alloc>::value_type = BinaryNode*&][m[K'
+ 1569 |       [01;36m[Kpush_back[m[K(const value_type& __x)
+      |       [01;36m[K^~~~~~~~~[m[K
+In file included from [01m[K/opt/GNAT/2020/include/c++/9.3.1/stack:61[m[K,
+                 from [01m[KtestBet.cpp:3[m[K:
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h: In instantiation of '[01m[Kclass std::stack<BinaryNode*&>[m[K':
+[01m[KtestBet.cpp:89:54:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:238:7:[m[K [01;31m[Kerror: [m[K'[01m[Kvoid std::stack<_Tp, _Sequence>::push(std::stack<_Tp, _Sequence>::value_type&&) [with _Tp = BinaryNode*&; _Sequence = std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >; std::stack<_Tp, _Sequence>::value_type = BinaryNode*&][m[K' cannot be overloaded with '[01m[Kvoid std::stack<_Tp, _Sequence>::push(const value_type&) [with _Tp = BinaryNode*&; _Sequence = std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >; std::stack<_Tp, _Sequence>::value_type = BinaryNode*&][m[K'
+  238 |       [01;31m[Kpush[m[K(value_type&& __x)
+      |       [01;31m[K^~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:233:7:[m[K [01;36m[Knote: [m[Kprevious declaration '[01m[Kvoid std::stack<_Tp, _Sequence>::push(const value_type&) [with _Tp = BinaryNode*&; _Sequence = std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >; std::stack<_Tp, _Sequence>::value_type = BinaryNode*&][m[K'
+  233 |       [01;36m[Kpush[m[K(const value_type& __x)
+      |       [01;36m[K^~~~[m[K
+[01m[KtestBet.cpp:[m[K In function '[01m[Kvoid infix(std::string, char&, std::stack<BinaryNode*&>)[m[K':
+[01m[KtestBet.cpp:135:29:[m[K [01;31m[Kerror: [m[Kno match for call to '[01m[K(std::string {aka std::__cxx11::basic_string<char>}) (std::string&, char&, std::stack<BinaryNode*&>&)[m[K'
+  135 |     postfix(postfix,sel,tree[01;31m[K)[m[K;
+      |                             [01;31m[K^[m[K
+[01m[KtestBet.cpp:[m[K In function '[01m[Kvoid postfix(std::string, char&, std::stack<BinaryNode*&>)[m[K':
+[01m[KtestBet.cpp:143:14:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[KinsertPostfixOperator[m[K'
+  143 |         tree.[01;31m[KinsertPostfixOperator[m[K(postfix.at(i));
+      |              [01;31m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[KtestBet.cpp:146:10:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[Kpreorder[m[K'
+  146 |     tree.[01;31m[Kpreorder[m[K();
+      |          [01;31m[K^~~~~~~~[m[K
+[01m[KtestBet.cpp:149:10:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[Kinorder[m[K'
+  149 |     tree.[01;31m[Kinorder[m[K();
+      |          [01;31m[K^~~~~~~[m[K
+[01m[KtestBet.cpp:152:10:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[Kpostorder[m[K'
+  152 |     tree.[01;31m[Kpostorder[m[K();
+      |          [01;31m[K^~~~~~~~~[m[K
+[01m[KtestBet.cpp:[m[K In function '[01m[Kvoid prefix(std::string, char&, std::stack<BinaryNode*&>)[m[K':
+[01m[KtestBet.cpp:164:14:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[KinsertPrefixOperator[m[K'
+  164 |         tree.[01;31m[KinsertPrefixOperator[m[K(prefix.at(i));
+      |              [01;31m[K^~~~~~~~~~~~~~~~~~~~[m[K
+[01m[KtestBet.cpp:167:10:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[Kpreorder[m[K'
+  167 |     tree.[01;31m[Kpreorder[m[K();
+      |          [01;31m[K^~~~~~~~[m[K
+[01m[KtestBet.cpp:170:10:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[Kinorder[m[K'
+  170 |     tree.[01;31m[Kinorder[m[K();
+      |          [01;31m[K^~~~~~~[m[K
+[01m[KtestBet.cpp:173:10:[m[K [01;31m[Kerror: [m[K'[01m[Kclass std::stack<BinaryNode*&>[m[K' has no member named '[01m[Kpostorder[m[K'
+  173 |     tree.[01;31m[Kpostorder[m[K();
+      |          [01;31m[K^~~~~~~~~[m[K
+In file included from [01m[K/opt/GNAT/2020/include/c++/9.3.1/deque:67[m[K,
+                 from [01m[K/opt/GNAT/2020/include/c++/9.3.1/stack:60[m[K,
+                 from [01m[KtestBet.cpp:3[m[K:
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h: In instantiation of '[01m[Kstd::deque<_Tp, _Alloc>::deque(const std::deque<_Tp, _Alloc>&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:99:11:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:978:23:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_start[m[K'
+  978 |         [01;31m[Kthis->_M_impl._M_start[m[K,
+      |         [01;31m[K~~~~~~~~~~~~~~^~~~~~~~[m[K
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h: In instantiation of '[01m[Kstd::_Deque_base<_Tp, _Alloc>::~_Deque_base() [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:1072:65:[m[K   required from '[01m[Kstd::deque<_Tp, _Alloc>::~deque() [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:99:11:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:681:25:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_map[m[K'
+  681 |       if ([01;31m[Kthis->_M_impl._M_map[m[K)
+      |           [01;31m[K~~~~~~~~~~~~~~^~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:683:35:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_start[m[K'
+  683 |    _M_destroy_nodes([01;31m[Kthis->_M_impl._M_start[m[K._M_node,
+      |                     [01;31m[K~~~~~~~~~~~~~~^~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:684:21:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_finish[m[K'
+  684 |       [01;31m[Kthis->_M_impl._M_finish[m[K._M_node + 1);
+      |       [01;31m[K~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:685:36:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_map[m[K'
+  685 |    _M_deallocate_map([01;31m[Kthis->_M_impl._M_map[m[K, this->_M_impl._M_map_size);
+      |                      [01;31m[K~~~~~~~~~~~~~~^~~~~~[m[K
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h: In instantiation of '[01m[Kstd::deque<_Tp, _Alloc>::size_type std::deque<_Tp, _Alloc>::size() const [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::deque<_Tp, _Alloc>::size_type = long unsigned int][m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:976:12:[m[K   required from '[01m[Kstd::deque<_Tp, _Alloc>::deque(const std::deque<_Tp, _Alloc>&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:99:11:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:1299:30:[m[K [01;31m[Kerror: [m[K'[01m[Kconst struct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_finish[m[K'
+ 1299 |       { return [01;31m[Kthis->_M_impl._M_finish[m[K - this->_M_impl._M_start; }
+      |                [01;31m[K~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:1299:56:[m[K [01;31m[Kerror: [m[K'[01m[Kconst struct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_start[m[K'
+ 1299 |       { return this->_M_impl._M_finish - [01;31m[Kthis->_M_impl._M_start[m[K; }
+      |                                          [01;31m[K~~~~~~~~~~~~~~^~~~~~~~[m[K
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h: In instantiation of '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_Deque_impl(const _Tp_alloc_type&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::_Deque_base<_Tp, _Alloc>::_Tp_alloc_type = std::allocator<BinaryNode*&>][m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:517:20:[m[K   required from '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_base(const allocator_type&, std::size_t) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::_Deque_base<_Tp, _Alloc>::allocator_type = std::allocator<BinaryNode*&>; std::size_t = long unsigned int][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:976:18:[m[K   required from '[01m[Kstd::deque<_Tp, _Alloc>::deque(const std::deque<_Tp, _Alloc>&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:99:11:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:582:26:[m[K [01;31m[Kerror: [m[Kusing invalid field '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_M_map[m[K'
+  582 |    _M_start(), _M_finish([01;31m[K)[m[K
+      |                          [01;31m[K^[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:582:26:[m[K [01;31m[Kerror: [m[Kusing invalid field '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_M_start[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:582:26:[m[K [01;31m[Kerror: [m[Kusing invalid field '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_M_finish[m[K'
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h: In instantiation of '[01m[Kvoid std::_Deque_base<_Tp, _Alloc>::_M_initialize_map(std::size_t) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::size_t = long unsigned int][m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:518:9:[m[K   required from '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_base(const allocator_type&, std::size_t) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>; std::_Deque_base<_Tp, _Alloc>::allocator_type = std::allocator<BinaryNode*&>; std::size_t = long unsigned int][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:976:18:[m[K   required from '[01m[Kstd::deque<_Tp, _Alloc>::deque(const std::deque<_Tp, _Alloc>&) [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:99:11:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:707:21:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_map[m[K'
+  707 |       [01;31m[Kthis->_M_impl._M_map[m[K = _M_allocate_map(this->_M_impl._M_map_size);
+      |       [01;31m[K~~~~~~~~~~~~~~^~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:722:36:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_map[m[K'
+  722 |    _M_deallocate_map([01;31m[Kthis->_M_impl._M_map[m[K, this->_M_impl._M_map_size);
+      |                      [01;31m[K~~~~~~~~~~~~~~^~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:723:18:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_map[m[K'
+  723 |    [01;31m[Kthis->_M_impl._M_map[m[K = _Map_pointer();
+      |    [01;31m[K~~~~~~~~~~~~~~^~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:728:21:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_start[m[K'
+  728 |       [01;31m[Kthis->_M_impl._M_start[m[K._M_set_node(__nstart);
+      |       [01;31m[K~~~~~~~~~~~~~~^~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:729:21:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_finish[m[K'
+  729 |       [01;31m[Kthis->_M_impl._M_finish[m[K._M_set_node(__nfinish - 1);
+      |       [01;31m[K~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:730:21:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_start[m[K'
+  730 |       [01;31m[Kthis->_M_impl._M_start[m[K._M_cur = _M_impl._M_start._M_first;
+      |       [01;31m[K~~~~~~~~~~~~~~^~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:730:47:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_start[m[K'
+  730 |       this->_M_impl._M_start._M_cur = [01;31m[K_M_impl._M_start[m[K._M_first;
+      |                                       [01;31m[K~~~~~~~~^~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:731:21:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_finish[m[K'
+  731 |       [01;31m[Kthis->_M_impl._M_finish[m[K._M_cur = (this->_M_impl._M_finish._M_first
+      |       [01;31m[K~~~~~~~~~~~~~~^~~~~~~~~[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:731:55:[m[K [01;31m[Kerror: [m[K'[01m[Kstruct std::_Deque_base<BinaryNode*&, std::allocator<BinaryNode*&> >::_Deque_impl[m[K' has no member named '[01m[K_M_finish[m[K'
+  731 |       this->_M_impl._M_finish._M_cur = ([01;31m[Kthis->_M_impl._M_finish[m[K._M_first
+      |                                         [01;31m[K~~~~~~~~~~~~~~^~~~~~~~~[m[K
+/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h: In instantiation of '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_Deque_impl() [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K':
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:509:17:[m[K   required from '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_base() [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:915:23:[m[K   required from '[01m[Kstd::deque<_Tp, _Alloc>::deque() [with _Tp = BinaryNode*&; _Alloc = std::allocator<BinaryNode*&>][m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_stack.h:157:6:[m[K   required from '[01m[Kstd::stack<_Tp, _Sequence>::stack() [with _Seq = std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >; _Requires = void; _Tp = BinaryNode*&; _Sequence = std::deque<BinaryNode*&, std::allocator<BinaryNode*&> >][m[K'
+[01m[KtestBet.cpp:182:19:[m[K   required from here
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:577:26:[m[K [01;31m[Kerror: [m[Kusing invalid field '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_M_map[m[K'
+  577 |    _M_start(), _M_finish([01;31m[K)[m[K
+      |                          [01;31m[K^[m[K
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:577:26:[m[K [01;31m[Kerror: [m[Kusing invalid field '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_M_start[m[K'
+[01m[K/opt/GNAT/2020/include/c++/9.3.1/bits/stl_deque.h:577:26:[m[K [01;31m[Kerror: [m[Kusing invalid field '[01m[Kstd::_Deque_base<_Tp, _Alloc>::_Deque_impl::_M_finish[m[K'
+]0;barry_jr@cobra:~/csc245/Prog2[barry_jr@cobra Prog2]$ ./[K[Kexit[K[K[K[K./a.out
+Building Binary Expression Trees
+----------------------------------------------
+1) Prefix
+2) Infix
+3) Postfix
+Your Expression Type: 2
+
+Your Expression: ((((a-b)+c)*((d+e)/f))-g)
+
+Infix Expression Produced From Tree:
+((((a-b)+c)*((d+e)/f))-g)
+Postfix Expression Produced From Tree:
+ab-c+de+f/*g-
+Build Another Tree? (Y/N): 
+N Y
+
+Building Binary Expression Trees
+----------------------------------------------
+1) Prefix
+2) Infix
+3) Postfix
+Your Expression Type: @ 2
+
+Your Expression: ^[[A^[[A^[[A            ((((a-b)+c)*((d+e)/f))-g)
+
+Infix Expression Produced From Tree:
+((((a-b)+c)*((d+e)/f))-g)
+Postfix Expression Produced From Tree:
+ab-c+de+f/*g-
+Build Another Tree? (Y/N): 
+N
+
+Program Now Deconstructing Tree & Exiting...
+]0;barry_jr@cobra:~/csc245/Prog2[barry_jr@cobra Prog2]$ exit
+exit
+
+Script done on Wed 07 Oct 2020 11:48:42 PM EDT

@@ -1,0 +1,48 @@
+Script started on Fri 04 Dec 2020 04:44:52 PM EST
+]0;barry_jr@cobra:~/csc245/Prog4[?1034h[barry_jr@cobra Prog4]$ ./SAMPLE ginfile5.dat4.dat\3.dat[1P2.dat1.dat[3Pa.out ginfile4.dat[2Pc++ dijkstra.cppa.out ginfile2.dat[2Pc++ dijkstra.cpp
+]0;barry_jr@cobra:~/csc245/Prog4[barry_jr@cobra Prog4]$ c++ dijkstra.cpp./SAMPLE ginfile5.dat4.dat\3.dat[1P2.dat1.dat[3Pa.out ginfile4.dat[2Pc++ dijkstra.cppa.out ginfile4.dat[1P.dat3.dat
+
+^^^^^^^^^^^^^^^^	DIJKSTRA'S ALGORITHM	^^^^^^^^^^^^^^^^ 
+ 
+ A Weighted Graph Has Been Built For These 12 Vertices: 
+
+            Athens           Atlanta           Augusta
+            Baxley           Conyers    Ft. Oglethorpe
+             Macon          Norcross          Savannah
+           Suwanee          Valdosta     Warner Robins
+                  
+
+Please input your starting vertex: Valdosta
+-----------------------------------------------------------------------
+        Vertex          Distance        Previous
+      Valdosta                 0             N/A
+         Macon               150        Valdosta
+ Warner Robins               170           Macon
+       Atlanta               230           Macon
+       Conyers               240           Macon
+        Athens               240           Macon
+      Norcross               250         Atlanta
+       Suwanee               260         Atlanta
+        Baxley               270           Macon
+      Savannah               310           Macon
+       Augusta               330          Athens
+Ft. Oglethorpe               340         Atlanta
+]0;barry_jr@cobra:~/csc245/Prog4[barry_jr@cobra Prog4]$ a.out ginfile3.dat[1P.dat5.dat
+
+^^^^^^^^^^^^^^^^	DIJKSTRA'S ALGORITHM	^^^^^^^^^^^^^^^^ 
+ 
+ A Weighted Graph Has Been Built For These 3 Vertices: 
+
+                V1                V2                V3
+                  
+
+Please input your starting vertex: V1
+-----------------------------------------------------------------------
+        Vertex          Distance        Previous
+            V1                 0             N/A
+            V2                 7              V1
+            V3                15              V2
+]0;barry_jr@cobra:~/csc245/Prog4[barry_jr@cobra Prog4]$ exit
+exit
+
+Script done on Fri 04 Dec 2020 04:45:53 PM EST

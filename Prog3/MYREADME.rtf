@@ -1,0 +1,105 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2513
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red255\green255\blue255;\red255\green255\blue255;
+\red255\green255\blue255;\red0\green0\blue0;\red0\green0\blue0;\red255\green255\blue255;\red26\green177\blue255;
+\red85\green80\blue165;\red0\green0\blue0;\red255\green255\blue255;\red26\green177\blue255;\red85\green80\blue165;
+\red251\green0\blue68;\red251\green0\blue68;\red251\green0\blue67;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c100000\c100000\c100000\c0;\cssrgb\c100000\c100000\c99971\c0;
+\cssrgb\c100000\c100000\c99956\c0;\cssrgb\c0\c1\c1;\cssrgb\c0\c1\c1;\cssrgb\c100000\c100000\c99985\c0;\cssrgb\c5881\c75051\c99990;
+\cssrgb\c40767\c40422\c70518;\cssrgb\c0\c1\c1;\cssrgb\c100000\c100000\c99985\c0;\cssrgb\c5881\c75051\c99990;\cssrgb\c40767\c40422\c70518;
+\cssrgb\c100000\c0\c33333;\cssrgb\c100000\c0\c33333;\cssrgb\c100000\c0\c33069;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\sl480\slmult1\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Jacoby Barry \
+Dr. Digh \
+CSC 245 \
+28 October 2020\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\sl480\slmult1\pardirnatural\qc\partightenfactor0
+\cf0 README\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\sl480\slmult1\pardirnatural\partightenfactor0
+\cf0 	1) \ul Zip\ulnone \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 10\
+10 1010\
+32 1011\
+67 1100\
+69 00\
+73 1101\
+77 1110\
+78 011\
+82 100\
+83 1111\
+84 010\
+111000100110000100101101000011011110111111010\
+\
+	\ul Encoding Table\
+\
+## ENCODING TABLE FOR ZIP FILE ##\
+\
+        Index   Char    Weight  Parent  ChildType\
+\
+        0       nl      1       10      0\
+        1       sp      1       10      1\
+        2       C       1       11      0\
+        3       E       3       16      0\
+        4       I       1       11      1\
+        5       M       1       12      0\
+        6       N       2       13      1\
+        7       R       2       14      0\
+        8       S       1       12      1\
+        9       T       1       13      0\
+        10      T1      2       14      1\
+        11      T2      2       15      0\
+        12      T3      2       15      1\
+        13      T4      3       16      1\
+        14      T5      4       17      0\
+        15      T6      4       17      1\
+        16      T7      6       18      0\
+        17      T8      8       18      1\
+        18      T9      14      0       N/A\
+\
+\ulnone 	2) \ul Huffman Tree of Nodes\
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \expnd0\expndtw0\kerning0
+\ulnone \outl0\strokewidth0 \strokec2 \'931)\cf0 \strokec0  \cf2 \strokec2 Start now with a forest of all your frequency nodes.\'94\cf0 \strokec0 \
+\cf2 \strokec2 \'932)\cf0 \strokec0  \cf2 \strokec2 Merge the smallest two frequencies.  If there is a tie, choose any two.\cf0 \strokec0  \cf2 \strokec2 Form a weighted total node for those two frequencies and label it as T1.\'94\cf0 \strokec0 \
+\cf2 \strokec2 \'933)\cf0 \strokec0  \cf2 \strokec2 Continue step 2) including your total nodes until all chars have a total node as a parent.\'94\cf0 \strokec0 \
+\cf2 \strokec2 \'934)Form a trie(a tree where left & right links get binary weights).\'94\cf0 \strokec0 \
+\cf2 \strokec2 \'935)Form an encoding table that allows for optimal prefix codes to be pulled from.  Your encoding table will have 2C-1\cf0 \strokec0  \cf2 \strokec2 entries where C\cf0 \strokec0  \cf2 \strokec2 is the number of characters.  In sample1, we have 7 characters, so our table will have 13 entries.\'94\cf0 \strokec0 \
+\cf2 \strokec2 \'936)\cf0 \strokec0  \cf2 \strokec2 Go to the next slide and see how I formed my Huffman tree.  Notice how letter a has a unique encoding of 001. To find it, you go left (0), then left (0), and then right (1).  Letters with higher frequencies are near the root, and letters with lower frequencies are at higher depths.\'94\
+\
+	\cb4 3)\cb5 \ul  Huffman Class\
+\
+\cf6 \cb3 \ulnone The Huffman Class helps you build a program that takes as input a text file from the command line and produces an encoding table that could be used to compress and uncompress this file using the Huffman\cf6 \strokec6 \
+\cf6 \strokec2 Encoding algorithm.The Huffman class includes these methods to help you make a tree using an array of structs\
+\cf2 \cb5 \ul \ulc2 \
+\cb3 \ulnone insert\'96 inserts a character and its associated weight into a node of the Huffman tree\cf0 \strokec0 \
+\cf2 \strokec2 \'95\cf0 \strokec0 \
+\cf2 \strokec2 inTree\'96 returns a boolean value indicating whether a given character is stored in the tree\cf0 \strokec0 \
+\cf2 \strokec2 \'95\cf0 \strokec0 \
+\cf2 \strokec2 GetFrequency\'96 returns the weight of a given character\cf0 \strokec0 \
+\cf2 \strokec2 \'95\cf0 \strokec0 \
+\cf2 \strokec2 GetCode\'96 returns the compressed code of a given character in the tree us\cf0 \strokec0 i\cf2 \strokec2 ng recursion\cf0 \strokec0 \
+\cf2 \strokec2 \'95\cf0 \strokec0 \
+\cf2 \strokec2 PrintTable\'96 displays the Huffman encoding table used in the compression process\cf0 \strokec0 \
+\cf2 \strokec2 \'95\cf0 \strokec0 \
+\cf2 \strokec2 numNodes\'96 returns the number of nodes currently in your Huffman tree\
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \outl0\strokewidth0 \'95\cf7 \cb8 \outl0\strokewidth0 \strokec9 Build-\cf7 \cb8 \strokec10 Builds the Huffman Tree;\
+\
+\pard\pardeftab720\partightenfactor0
+\cf2 \cb3 \outl0\strokewidth0 \'95\cf11 \cb12 Lookup-\cf6 \cb3 \outl0\strokewidth0 \strokec10 returns the index of a given character in tree\
+\
+\cf2 \outl0\strokewidth0 \'95\cf11 \cb12 Lookup-\cf11 \cb3 returns the index of a given character in tree
+\f1 \cf15 \cb1 \
+\pard\pardeftab720\partightenfactor0
+\cf16 \outl0\strokewidth0 \strokec16 \
+
+\f0 \cf7 \cb8 \strokec17 \
+\cf0 \cb3 \strokec0 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \strokec0 \
+}
